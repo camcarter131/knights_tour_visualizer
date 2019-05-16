@@ -1,0 +1,17 @@
+#main-div {
+    
+}
+
+#canvas {
+    background-color: rgba(37, 31, 124, 0.67);
+}
+
+#title-div {
+    display: flex;
+    justify-content: center;
+}
+
+#canvas-div {
+    display: flex;
+    justify-content: center;
+}

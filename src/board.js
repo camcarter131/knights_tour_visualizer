@@ -1,28 +1,46 @@
+const MOVE_OFFSETS = [[-1,-2], [-1,2], [1,-2], [1,2], [-2,-1], [-2,1], [2,-1], [2,1]];
+
 export default class Board {
     constructor(canvas, ctx) {
         this.width = canvas.width;
         this.height = canvas.height;
-        this.squareHeight = this.height/8;
-        this.boardArray = [...Array(8)].map(e => ["X", "X", "X", "X", "X", "X", "X", "X"]);
+        this.boardSize = 8;
+        this.squareHeight = this.height/this.boardSize;
+        this.boardArray = [...Array(8)].map(e => new Array(this.boardSize).fill('X'));
+        this.boardGraph = {};
         this.numSquares = 8;
         this.ctx = ctx;
         this.ctx.fillRect(0, 0, 70, 70);
+        this.buildGraph();
         this.renderBoard();
+
     }
 
-    drawBoard() {
-        // debugger
+    //given a position on the board, returns all
+    //possible knight moves from that position
+    possibleKnightMoves(position) {
+        let moves = [];
+        MOVE_OFFSETS.forEach(move => {
+            let row = position[0];
+            let col = position[1];
+            let rowOffset = move[0];
+            let colOffset = move[1];
+            let newRow = row + rowOffset;
+            let newCol = col + colOffset;
+            ((0 <= newRow)&&(newRow <= this.boardSize - 1)&&(0 <= newCol)&&(newCol <= this.boardSize - 1)) ?
+            moves.push([newRow, newCol]) : null
+        })
+        return moves;
+    }
 
-
-        for (let i=0; i<this.width; i+= this.squareHeight) {
-            for (let j = 0; j < this.width; j += this.squareHeight) {
-                if ((i+j) % 2 === 0) {
-                    debugger
-                    this.ctx.fillRect(i, j, this.squareHeight, this.squareHeight);
-                }
+    //builds graph with positions on the board as keys and all 
+    //possible knight moves from the key position as values
+    buildGraph() {
+        for (let i=0; i<this.boardSize; i+=1) {
+            for (let j=0; j<this.boardSize; j+=1) {
+                this.boardGraph[[i,j]] = this.possibleKnightMoves([i,j]);
             }
         }
-
     }
 
     renderBoard() {
@@ -50,6 +68,10 @@ export default class Board {
 
     arrayToCanvas(arrayCoordinates) {
         return [this.squareHeight * arrayCoordinates[1], this.squareHeight * arrayCoordinates[0]];
+    }
+
+    dfs(start) {
+        
     }
 
 }

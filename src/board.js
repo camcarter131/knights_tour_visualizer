@@ -1,18 +1,19 @@
 const MOVE_OFFSETS = [[-1,-2], [-1,2], [1,-2], [1,2], [-2,-1], [-2,1], [2,-1], [2,1]];
+import Knight from './knight';
+import Path from './path';
 
 export default class Board {
-    constructor(canvas, ctx, numIterDOM) {
+    constructor(canvas, ctx, numIterDOM, msgDOM) {
         this.ctx = ctx;
         this.numIterDOM = numIterDOM;
-        this.interval = 50;
+        this.msgDOM = msgDOM;
+        this.interval = 3000;
         this.width = canvas.width;
         this.height = canvas.height;
         this.boardSize = 8;
         this.squareHeight = this.height/this.boardSize;
         this.boardArray = [...Array(8)].map(e => new Array(this.boardSize).fill('X'));
         this.boardGraph = {};
-        this.img = new Image();
-        this.img.src = "https://cdn3.iconfinder.com/data/icons/sports-2-5/512/66-512.png";
 
         //Colors
         // this.purple = "#251F7CB3";
@@ -43,6 +44,7 @@ export default class Board {
         }
     }
 
+    //render functions
     renderSquare(pos) {
         let x = pos[0];
         let y = pos[1];
@@ -77,13 +79,6 @@ export default class Board {
         this.ctx.fillRect(canvasCoords[0], canvasCoords[1], this.squareHeight, this.squareHeight);
     }
 
-    renderKnight(pos) {
-        let x = pos[0];
-        let y = pos[1];
-        let canvasCoords = this.arrayToCanvas([x, y]);
-        this.ctx.drawImage(this.img,canvasCoords[0]+15, canvasCoords[1]+15, this.squareHeight-30, this.squareHeight-30);
-    }
-
     renderBoard() {
         this.boardArray.forEach((row, x) => {
             row.forEach((el, y) => {
@@ -112,10 +107,8 @@ export default class Board {
     //given a position on the board, returns all
     //possible knight moves from that position
     possibleKnightMoves(position) {
-        debugger
         let moves = [];
         MOVE_OFFSETS.forEach(move => {
-            // this.numIterDOM.innerText = 1 + parseInt(this.numIterDOM.innerText);
             let row = position[0];
             let col = position[1];
             let rowOffset = move[0];
@@ -137,18 +130,25 @@ export default class Board {
     //3. continue until the tour is complete or there is nowhere else to move.
     warnsdorff(pos=this.randomPosition(), interval=this.interval) {
         this.renderBoard();
-        let alreadyVisited = [pos];
-        this.renderSquareDarkened(pos);
-        this.renderKnight(pos);
+        this.msgDOM.innerText = "";
+        this.numIterDOM.innerText = 0;
+        let alreadyVisited = [];
+        // this.renderSquareDarkened(pos);
+        Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
 
         const nextIter = () => {
             if (this.warnsdorffNextMove(pos, alreadyVisited).length > 0) {
                 alreadyVisited.push(pos);
+                console.log(alreadyVisited);
                 pos = this.warnsdorffNextMove(pos, alreadyVisited);
-                this.renderSquareDarkened(alreadyVisited[alreadyVisited.length-1])
-                this.renderSquareDarkened(pos);
-                this.renderKnight(pos);
+                // this.renderSquareDarkened(alreadyVisited[alreadyVisited.length-1])
+                // this.renderSquareDarkened(pos);
+                Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
                 setTimeout(() => nextIter(), this.interval);
+            } else {
+                alreadyVisited.push(pos);
+                (alreadyVisited.length === 64) ? this.msgDOM.innerText = "Success" 
+                : this.msgDOM.innerText = "Failed to converge on a solution";
             }
         }
 
@@ -185,20 +185,26 @@ export default class Board {
         }
     }
 
-    backtracking(pos = this.randomPosition(), interval = this.interval, alreadyVisited=[]) {
+    backtracking() {
+
+    }
+
+    bruteForce(pos = this.randomPosition(), interval = this.interval, alreadyVisited = []) {
         // this.renderBoard(); 
+        // this.numIterDOM.innerText = 0;
         alreadyVisited.push(pos);
-        this.renderSquareDarkened(pos);
-        this.renderKnight(pos);
-        
-        // const 
-        if (alreadyVisited.length === (this.boardSize**2)) return;
+        // this.renderSquareDarkened(pos);
+        Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
+
+        if (alreadyVisited.length === (this.boardSize ** 2)) return;
         let possibleNextMoves = this.possibleKnightMoves(pos).filter(move => !(this.includesArr(alreadyVisited, move)));
         possibleNextMoves.forEach(move => {
-            this.backtracking(move, this.interval, alreadyVisited);
+            // console.log(move);
+            setTimeout(this.backtracking(move, this.interval, alreadyVisited), 5000);
+
         })
-        this.renderSquare(pos);
-        alreadyVisited.pop();
+        // this.renderSquare(pos);
+        // alreadyVisited.pop();
     }
 
 }

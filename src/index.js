@@ -5,8 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext('2d');
     const numIter = document.getElementById('num-iter');
-    
-    const board = new Board(canvas, ctx, numIter);
+    const msg = document.getElementById('msg-div');
+
+    const board = new Board(canvas, ctx, numIter, msg);
     
     const warnsdorffButton = document.getElementById("warnsdorff");
     const backtrackingButton = document.getElementById("backtracking");

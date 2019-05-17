@@ -1,24 +1,27 @@
-const MOVE_OFFSETS = [[-1,-2], [-1,2], [1,-2], [1,2], [-2,-1], [-2,1], [2,-1], [2,1]];
+const MOVE_OFFSETS = [[2,1], [1,2], [-1,2], [-2,1], [-2,-1], [-1,-2], [1,-2], [2,-1]];
 import Knight from './knight';
 import Path from './path';
 
 export default class Board {
-    constructor(canvas, ctx, numIterDOM, msgDOM) {
+    constructor(canvas, ctx, numIterDOM, msgDOM, intervalDOM) {
         this.ctx = ctx;
         this.numIterDOM = numIterDOM;
         this.msgDOM = msgDOM;
-        this.interval = 3000;
+        this.interval = parseInt(intervalDOM.value);
+        // debugger
+        // this.interval = 80;
         this.width = canvas.width;
         this.height = canvas.height;
         this.boardSize = 8;
         this.squareHeight = this.height/this.boardSize;
-        this.boardArray = [...Array(8)].map(e => new Array(this.boardSize).fill('X'));
+        this.boardArray = [...Array(this.boardSize)].map(e => new Array(this.boardSize).fill('X'));
         this.boardGraph = {};
-
+        this.img = new Image();
+        this.img.src = "https://cdn3.iconfinder.com/data/icons/sports-2-5/512/66-512.png";
         //Colors
         // this.purple = "#251F7CB3";
         // this.purple = "rgba(37, 31, 124, 70)";
-        this.purple = "rgb(118, 113, 194)";
+        this.purple = "rgb(20, 100, 200)";
         this.purpleDarkened = "#251F7C";
         this.lightDarkened = "rgb(197, 193, 181)";
         this.light = "#f0ead6";
@@ -32,6 +35,11 @@ export default class Board {
         //Build knight's graph and render initial board
         // this.buildGraph();
         this.renderBoard();
+    }
+
+    changeInterval(e) {
+        // debugger
+        this.interval = e.target.value;
     }
 
     //builds graph with positions on the board as keys and all 
@@ -69,6 +77,38 @@ export default class Board {
             this.ctx.fillStyle = this.purpleDarkened;
             this.ctx.fillRect(canvasCoords[0], canvasCoords[1], this.squareHeight, this.squareHeight);
         }
+    }
+
+    renderKnight(pos) {
+        let x = pos[0];
+        let y = pos[1];
+        let canvasCoords = this.arrayToCanvas([x, y]);
+        this.ctx.drawImage(this.img, canvasCoords[0] + 15, canvasCoords[1] + 15, this.squareHeight - 30, this.squareHeight - 30);
+    }
+
+    renderLine(pos1, pos2) {
+        let x1 = pos1[0];
+        let y1 = pos1[1];
+        let canvasCoords1 = this.arrayToCanvas([x1, y1]);
+        canvasCoords1[0] += this.squareHeight/2;
+        canvasCoords1[1] += this.squareHeight/2;
+
+        let x2 = pos2[0];
+        let y2 = pos2[1];
+        let canvasCoords2 = this.arrayToCanvas([x2, y2]);
+        canvasCoords2[0] += this.squareHeight/2;
+        canvasCoords2[1] += this.squareHeight/2;
+        this.ctx.fillStyle = "#000000";
+        this.ctx.lineWidth = 3.5;
+        this.ctx.beginPath();
+        this.ctx.arc(canvasCoords1[0], canvasCoords1[1], 4, 0, 2 * Math.PI);
+    
+        this.ctx.moveTo(canvasCoords1[0], canvasCoords1[1]);
+        this.ctx.lineTo(canvasCoords2[0], canvasCoords2[1]);
+        this.ctx.arc(canvasCoords2[0], canvasCoords2[1], 4, 0, 2 * Math.PI);
+     
+        this.ctx.fill();
+        this.ctx.stroke();
     }
 
     renderPossibleNextMove(pos) {
@@ -128,25 +168,25 @@ export default class Board {
     //1. Set random intial position
     //2. move to position that has the minimum viable moves from it.
     //3. continue until the tour is complete or there is nowhere else to move.
-    warnsdorff(pos=this.randomPosition(), interval=this.interval) {
+    warnsdorff(pos=this.randomPosition()) {
         this.renderBoard();
         this.msgDOM.innerText = "";
         this.numIterDOM.innerText = 0;
         let alreadyVisited = [];
-        // this.renderSquareDarkened(pos);
-        Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
 
         const nextIter = () => {
+            if (alreadyVisited.length > 0) {
+                let prevPos = alreadyVisited[alreadyVisited.length - 1];
+                // this.renderSquare(prevPos);
+                this.renderLine(prevPos, pos);
+
+            }
+            // this.renderKnight(pos);
+            alreadyVisited.push(pos);
             if (this.warnsdorffNextMove(pos, alreadyVisited).length > 0) {
-                alreadyVisited.push(pos);
-                console.log(alreadyVisited);
                 pos = this.warnsdorffNextMove(pos, alreadyVisited);
-                // this.renderSquareDarkened(alreadyVisited[alreadyVisited.length-1])
-                // this.renderSquareDarkened(pos);
-                Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
                 setTimeout(() => nextIter(), this.interval);
             } else {
-                alreadyVisited.push(pos);
                 (alreadyVisited.length === 64) ? this.msgDOM.innerText = "Success" 
                 : this.msgDOM.innerText = "Failed to converge on a solution";
             }
@@ -169,8 +209,6 @@ export default class Board {
         //display possible next moves and there possible next moves
         // Object.keys(movesDegrees).forEach(move => this.renderPossibleNextMove([parseInt(move[0],10), parseInt(move[2],10)]));
 
-        // debugger
-
         let minNextMoves = Math.min.apply(null, Object.values(movesDegrees));       
         let warnsdorffFinalNextMove = undefined;
         Object.keys(movesDegrees).forEach(move => {
@@ -192,19 +230,30 @@ export default class Board {
     bruteForce(pos = this.randomPosition(), interval = this.interval, alreadyVisited = []) {
         // this.renderBoard(); 
         // this.numIterDOM.innerText = 0;
+        // debugger
+        console.log('recursive call');
         alreadyVisited.push(pos);
-        // this.renderSquareDarkened(pos);
-        Knight.renderKnight(this.ctx, this.arrayToCanvas([pos[0], pos[1]]), this.squareHeight);
+        if (alreadyVisited.length > 0) {
+            let prevPos = alreadyVisited[alreadyVisited.length - 1];
+            // this.renderSquare(prevPos);
+            this.renderLine(prevPos, pos);
+
+        }
 
         if (alreadyVisited.length === (this.boardSize ** 2)) return;
         let possibleNextMoves = this.possibleKnightMoves(pos).filter(move => !(this.includesArr(alreadyVisited, move)));
         possibleNextMoves.forEach(move => {
+            // debugger
             // console.log(move);
-            setTimeout(this.backtracking(move, this.interval, alreadyVisited), 5000);
+            // setTimeout(this.backtracking(move, this.interval, alreadyVisited), 1);
+            setTimeout(this.bruteForce(move, this.interval, alreadyVisited), this.interval);
+            
 
         })
         // this.renderSquare(pos);
-        // alreadyVisited.pop();
+        // let prevPos = alreadyVisited[alreadyVisited.length - 1];
+        // this.renderLine(prevPos, pos);
+        alreadyVisited.pop();
     }
 
 }

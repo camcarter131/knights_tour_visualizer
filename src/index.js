@@ -7,10 +7,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const numIter = document.getElementById('num-iter');
     const msg = document.getElementById('msg-div');
 
-    const board = new Board(canvas, ctx, numIter, msg);
+    const slider = document.getElementById('slider');
     
+    const board = new Board(canvas, ctx, numIter, msg, slider);
+    
+    slider.addEventListener("change", e => board.changeInterval(e));
     const warnsdorffButton = document.getElementById("warnsdorff");
     const backtrackingButton = document.getElementById("backtracking");
+    const bruteForceButton = document.getElementById("brute-force");
+    bruteForceButton.addEventListener("click", e => board.bruteForce());
     backtrackingButton.addEventListener("click", e => board.backtracking());
     warnsdorffButton.addEventListener("click", e => board.warnsdorff() );
 })

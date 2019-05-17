@@ -29,7 +29,7 @@ export default class Board {
         this.backtracking = this.backtracking.bind(this);
 
         //Build knight's graph and render initial board
-        this.buildGraph();
+        // this.buildGraph();
         this.renderBoard();
     }
 
@@ -112,16 +112,22 @@ export default class Board {
     //given a position on the board, returns all
     //possible knight moves from that position
     possibleKnightMoves(position) {
+        debugger
         let moves = [];
         MOVE_OFFSETS.forEach(move => {
+            // this.numIterDOM.innerText = 1 + parseInt(this.numIterDOM.innerText);
             let row = position[0];
             let col = position[1];
             let rowOffset = move[0];
             let colOffset = move[1];
             let newRow = row + rowOffset;
             let newCol = col + colOffset;
-            ((0 <= newRow) && (newRow <= this.boardSize - 1) && (0 <= newCol) && (newCol <= this.boardSize - 1)) ?
-                moves.push([newRow, newCol]) : null
+            if ((0 <= newRow) && (newRow <= this.boardSize - 1) && (0 <= newCol) && (newCol <= this.boardSize - 1)) {
+                moves.push([newRow, newCol]);
+                this.numIterDOM.innerText = 1 + parseInt(this.numIterDOM.innerText);
+            } else {
+                return;
+            }
         })
         return moves;
     }
@@ -137,7 +143,6 @@ export default class Board {
 
         const nextIter = () => {
             if (this.warnsdorffNextMove(pos, alreadyVisited).length > 0) {
-                this.numIterDOM.innerText = 1 + parseInt(this.numIterDOM.innerText);
                 alreadyVisited.push(pos);
                 pos = this.warnsdorffNextMove(pos, alreadyVisited);
                 this.renderSquareDarkened(alreadyVisited[alreadyVisited.length-1])

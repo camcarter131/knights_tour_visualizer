@@ -1,5 +1,6 @@
 #main-div {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-image: linear-gradient(to right bottom, rgba(56, 10, 141, 0.699), rgb(148, 179, 219)), linear-gradient(transparent, rgb(37, 37, 37) 70%);
 }
 
 #canvas {
@@ -8,6 +9,9 @@
     /* color: rgb(197, 193, 181) */
     /* background-color:#251F7CB3; */
     /* background-color: rgba(37, 31, 124, 0.70); */
+
+
+
 }
 
 #title-div {
@@ -20,6 +24,11 @@
 #canvas-div {
     display: flex;
     justify-content: center;
+    border: 1px;
+    border-color: black;
+    border-style: double;
+    border-bottom: none;
+    border-right: none;
 }
 
 #content-div {

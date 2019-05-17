@@ -4,6 +4,12 @@ import Board from './board';
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext('2d');
-    // debugger
-    let board = new Board(canvas, ctx);
+    const numIter = document.getElementById('num-iter');
+    
+    const board = new Board(canvas, ctx, numIter);
+    
+    const warnsdorffButton = document.getElementById("warnsdorff");
+    const backtrackingButton = document.getElementById("backtracking");
+    backtrackingButton.addEventListener("click", e => board.backtracking());
+    warnsdorffButton.addEventListener("click", e => board.warnsdorff() );
 })

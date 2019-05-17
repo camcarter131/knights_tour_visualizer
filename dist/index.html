@@ -14,9 +14,31 @@
         <div id="title-div">
             <h1>Knight's Tour Visualizer</h1>
         </div>
-        <div id="canvas-div">
-            <canvas width=560 height=560 id="canvas">
-            </canvas>
+        <div id="content-div">
+            <div id="canvas-div">
+                <canvas width=560 height=560
+                 id="canvas">
+                </canvas>
+            </div>
+            <div id="algo-div">
+                <button class="algo-btn" id="backtracking">
+                    Backtracking
+                </button>
+                <button class="algo-btn" id="warnsdorff">
+                    Warnsdorff's Heuristic
+                </button>
+                <button class="algo-btn" id="divide-conquer">
+                    Divide & Conquer
+                </button>
+            </div>
+        </div>
+        <div id="bar-div">
+            <div id="speed-div">
+                Speed
+            </div>
+            <div id="iter-div">
+                Iterations: <h3 id="num-iter">0</h3>
+            </div>
         </div>
     </div>
 </body>

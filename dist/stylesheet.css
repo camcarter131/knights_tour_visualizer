@@ -92,3 +92,19 @@
     flex-direction: column;
     justify-content: space-evenly;
 }
+
+#github-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius:50%;
+    height: 40px;
+    width: 40px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+#github-img {
+    height: 70px;
+    width: 70px;
+}

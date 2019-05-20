@@ -16,20 +16,23 @@ export default class Board {
         this.squareHeight = this.height/this.boardSize;
         this.boardArray = [...Array(this.boardSize)].map(e => new Array(this.boardSize).fill('X'));
         this.boardGraph = {};
-        this.img = new Image();
-        this.img.src = "https://cdn3.iconfinder.com/data/icons/sports-2-5/512/66-512.png";
+        this.knight = new Image();
+        // this.knight.src = "https://cdn3.iconfinder.com/data/icons/sports-2-5/512/66-512.png";
+        this.knight.src = "https://raw.githubusercontent.com/ognjenvucko/knights-tour/master/images/horse.png";
+
+        this.knightTransparent = new Image();
+        this.knightTransparent.src = "https://raw.githubusercontent.com/ognjenvucko/knights-tour/master/images/horse2.png";
         //Colors
         // this.purple = "#251F7CB3";
         // this.purple = "rgba(37, 31, 124, 70)";
         this.purple = "rgb(20, 100, 200)";
-        this.purpleDarkened = "#251F7C";
+        this.purpleDarkened = "rgba(8, 88, 216, 0.733)";
         this.lightDarkened = "rgb(197, 193, 181)";
         this.light = "#f0ead6";
         this.possibleSquare = "rgb(156, 233, 210)";
 
         //Bind functions
         this.warnsdorff = this.warnsdorff.bind(this);
-        this.renderSquareDarkened = this.renderSquareDarkened.bind(this);
         this.backtracking = this.backtracking.bind(this);
 
         //Build knight's graph and render initial board
@@ -79,14 +82,38 @@ export default class Board {
         }
     }
 
-    renderKnight(pos) {
+    clearSquare(pos) {
         let x = pos[0];
         let y = pos[1];
         let canvasCoords = this.arrayToCanvas([x, y]);
-        this.ctx.drawImage(this.img, canvasCoords[0] + 15, canvasCoords[1] + 15, this.squareHeight - 30, this.squareHeight - 30);
+        this.ctx.clearRect(canvasCoords[0], canvasCoords[1], this.squareHeight, this.squareHeight);
     }
 
-    renderLine(pos1, pos2) {
+    renderKnight(pos, transparent = null) {
+        let x = pos[0];
+        let y = pos[1];
+        let canvasCoords = this.arrayToCanvas([x, y]);
+        if (transparent) {
+            this.ctx.drawImage(this.knightTransparent, canvasCoords[0] + 15, canvasCoords[1] + 15, this.squareHeight - 30, this.squareHeight - 30);
+        } else {
+            this.ctx.drawImage(this.knight, canvasCoords[0] + 15, canvasCoords[1] + 15, this.squareHeight - 30, this.squareHeight - 30);
+        }
+    }
+
+    renderNum (pos, numAsString) {
+        let x = pos[0];
+        let y = pos[1];
+        let canvasCoords = this.arrayToCanvas([x, y]);
+        this.ctx.fillStyle = "#000000";
+        this.ctx.font = "34px Trebuchet MS";
+        this.ctx.fillText(numAsString, canvasCoords[0] + 27, canvasCoords[1] + 48);
+        this.ctx.fill();
+    }
+
+    //helper method for render path
+    renderLine(pos1, pos2, color="#000000") {
+        // this.ctx.clearRect(0, 0, this.width, this.height);
+        // this.renderBoard();
         let x1 = pos1[0];
         let y1 = pos1[1];
         let canvasCoords1 = this.arrayToCanvas([x1, y1]);
@@ -98,17 +125,37 @@ export default class Board {
         let canvasCoords2 = this.arrayToCanvas([x2, y2]);
         canvasCoords2[0] += this.squareHeight/2;
         canvasCoords2[1] += this.squareHeight/2;
-        this.ctx.fillStyle = "#000000";
+        this.ctx.fillStyle = color;
         this.ctx.lineWidth = 3.5;
         this.ctx.beginPath();
-        this.ctx.arc(canvasCoords1[0], canvasCoords1[1], 4, 0, 2 * Math.PI);
+        this.ctx.arc(canvasCoords1[0], canvasCoords1[1], 5, 0, 2 * Math.PI);
     
         this.ctx.moveTo(canvasCoords1[0], canvasCoords1[1]);
         this.ctx.lineTo(canvasCoords2[0], canvasCoords2[1]);
-        this.ctx.arc(canvasCoords2[0], canvasCoords2[1], 4, 0, 2 * Math.PI);
+        this.ctx.arc(canvasCoords2[0], canvasCoords2[1], 5, 0, 2 * Math.PI);
      
         this.ctx.fill();
+        this.ctx.strokeStyle = color;
         this.ctx.stroke();
+        // this.ctx.fill();
+    }
+
+    renderPath(path) {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.renderBoard();
+        if (path.length === 1) this.renderKnight(path[0]);
+        for (let i=0; i<path.length-1; i+=1){
+            this.renderLine(path[i], path[i+1]);
+            if (i === path.length-2) this.renderKnight(path[i+1]);
+        }
+    }
+
+    renderPathWithoutClearing(path) {
+        if (path.length === 1) this.renderKnight(path[0]);
+        for (let i = 0; i < path.length - 1; i += 1) {
+            this.renderLine(path[i], path[i + 1]);
+            if (i === path.length - 2) this.renderKnight(path[i + 1]);
+        }
     }
 
     renderPossibleNextMove(pos) {
@@ -146,7 +193,7 @@ export default class Board {
 
     //given a position on the board, returns all
     //possible knight moves from that position
-    possibleKnightMoves(position) {
+    possibleKnightMoves(position, alreadyVisited=[]) {
         let moves = [];
         MOVE_OFFSETS.forEach(move => {
             let row = position[0];
@@ -162,6 +209,10 @@ export default class Board {
                 return;
             }
         })
+        if (alreadyVisited.length > 0) {
+            moves = moves.map(move => !(this.includesArr(alreadyVisited, move)) ? move : undefined);
+            moves = moves.filter(move => move != undefined);
+        }
         return moves;
     }
 
@@ -175,14 +226,9 @@ export default class Board {
         let alreadyVisited = [];
 
         const nextIter = () => {
-            if (alreadyVisited.length > 0) {
-                let prevPos = alreadyVisited[alreadyVisited.length - 1];
-                // this.renderSquare(prevPos);
-                this.renderLine(prevPos, pos);
-
-            }
-            // this.renderKnight(pos);
-            alreadyVisited.push(pos);
+            alreadyVisited.push(pos);      
+            this.renderPath(alreadyVisited);
+            
             if (this.warnsdorffNextMove(pos, alreadyVisited).length > 0) {
                 pos = this.warnsdorffNextMove(pos, alreadyVisited);
                 setTimeout(() => nextIter(), this.interval);
@@ -196,30 +242,55 @@ export default class Board {
     }
 
     warnsdorffNextMove(pos, alreadyVisited) {
-        let moves = this.possibleKnightMoves(pos);
-        moves = moves.map(move => !(this.includesArr(alreadyVisited, move)) ? move : undefined);
-        moves = moves.filter(move => move != undefined);
+        let moves = this.possibleKnightMoves(pos, alreadyVisited);
         let movesDegrees = {};
-        moves.forEach(move => {
-            let nextMoves = this.possibleKnightMoves(move);
-            nextMoves = nextMoves.filter(nextMove => !(this.includesArr(alreadyVisited, nextMove)));
-            movesDegrees[move] = nextMoves.length;
-        })
+        // moves.forEach(move => {
+        //     let nextMoves = this.possibleKnightMoves(move);
+        //     nextMoves = nextMoves.filter(nextMove => !(this.includesArr(alreadyVisited, nextMove)));
+        //     movesDegrees[move] = nextMoves.length;
+        // })
+
+        const iterMove = (i) => {
+            if (i < moves.length) {
+                let move = moves[i];
+                let nextMoves = this.possibleKnightMoves(move);
+                nextMoves = nextMoves.filter(nextMove => !(this.includesArr(alreadyVisited, nextMove)));
+                movesDegrees[move] = nextMoves.length;
+                this.clearSquare(move);
+                this.renderSquareDarkened(move);
+                // this.renderKnight(move, true);
+                this.renderNum(move, movesDegrees[move]);
+                this.renderPathWithoutClearing(alreadyVisited);
+                // this.renderLine(pos, move, "#2cf1d7");
+                // alreadyVisited.push(move);
+                // this.renderPath(alreadyVisited);
+                // alreadyVisited.pop();
+                setTimeout(iterMove(i+1), this.interval);
+            } else {
+                return;
+            }
+        }
+
+        setTimeout(iterMove(0), this.interval);
 
         //display possible next moves and there possible next moves
         // Object.keys(movesDegrees).forEach(move => this.renderPossibleNextMove([parseInt(move[0],10), parseInt(move[2],10)]));
 
-        let minNextMoves = Math.min.apply(null, Object.values(movesDegrees));       
-        let warnsdorffFinalNextMove = undefined;
-        Object.keys(movesDegrees).forEach(move => {
-            if (movesDegrees[move] === minNextMoves) {
-                warnsdorffFinalNextMove = move;
+        if (Object.keys(movesDegrees).length === moves.length) {
+            let minNextMoves = Math.min.apply(null, Object.values(movesDegrees));
+            let warnsdorffFinalNextMove = undefined;
+            Object.keys(movesDegrees).forEach(move => {
+                if (movesDegrees[move] === minNextMoves) {
+                    warnsdorffFinalNextMove = move;
+                }
+            })
+
+
+            if (warnsdorffFinalNextMove) {
+                return [parseInt(warnsdorffFinalNextMove[0], 10), parseInt(warnsdorffFinalNextMove[2], 10)];
+            } else {
+                return [];
             }
-        })
-        if (warnsdorffFinalNextMove) {
-            return [parseInt(warnsdorffFinalNextMove[0],10), parseInt(warnsdorffFinalNextMove[2],10)];
-        } else {
-            return [];
         }
     }
 
@@ -227,33 +298,40 @@ export default class Board {
 
     }
 
-    bruteForce(pos = this.randomPosition(), interval = this.interval, alreadyVisited = []) {
-        // this.renderBoard(); 
-        // this.numIterDOM.innerText = 0;
-        // debugger
-        console.log('recursive call');
+    bruteForce(pos = this.randomPosition(), alreadyVisited = []) {
         alreadyVisited.push(pos);
-        if (alreadyVisited.length > 0) {
-            let prevPos = alreadyVisited[alreadyVisited.length - 1];
-            // this.renderSquare(prevPos);
-            this.renderLine(prevPos, pos);
+        this.renderPath(alreadyVisited);
 
+        debugger
+
+        if (alreadyVisited.length === (this.boardSize ** 2)) {
+            // debugger
+            this.msgDOM.innerText = "Success";
+            return;
         }
 
-        if (alreadyVisited.length === (this.boardSize ** 2)) return;
-        let possibleNextMoves = this.possibleKnightMoves(pos).filter(move => !(this.includesArr(alreadyVisited, move)));
-        possibleNextMoves.forEach(move => {
-            // debugger
-            // console.log(move);
-            // setTimeout(this.backtracking(move, this.interval, alreadyVisited), 1);
-            setTimeout(this.bruteForce(move, this.interval, alreadyVisited), this.interval);
+        else {
+            let possibleNextMoves = this.possibleKnightMoves(pos, alreadyVisited);
+            if (possibleNextMoves.length === 0) {
+                this.renderBoard();
+                return;
+            }
             
+            // const iterMove = i => {
+            //     let alreadyVisitedFrozen = alreadyVisited;
+            //     if (i < possibleNextMoves.length) {
+            //         this.bruteForce(possibleNextMoves[i], alreadyVisitedFrozen);
+            //         setTimeout(iterMove(i+1), 1000000);
+            //     } else {
+            //         return;
+            //     }
+            // }
 
-        })
-        // this.renderSquare(pos);
-        // let prevPos = alreadyVisited[alreadyVisited.length - 1];
-        // this.renderLine(prevPos, pos);
-        alreadyVisited.pop();
+            // setTimeout(iterMove(0), 1000000);
+            // return;
+            this.msgDOM.innerText = "Failure";
+            this.renderPath(alreadyVisited);
+        }
     }
 
 }

@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const warnsdorffButton = document.getElementById("warnsdorff");
     const backtrackingButton = document.getElementById("backtracking");
     const bruteForceButton = document.getElementById("brute-force");
-    bruteForceButton.addEventListener("click", e => board.bruteForce());
+    bruteForceButton.addEventListener("click", e => board.bruteForce([0,0],[]));
     backtrackingButton.addEventListener("click", e => board.backtracking());
     warnsdorffButton.addEventListener("click", e => board.warnsdorff() );
 })

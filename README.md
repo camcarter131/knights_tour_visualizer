@@ -4,4 +4,4 @@ A visual presentation of different algorithms for solving the classic chess prob
 
 VIEW LIVE: https://camcarter131.github.io/knights_tour_visualizer/
 
-![](images/tour3.gif)
+![](tour3.gif)

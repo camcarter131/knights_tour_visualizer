@@ -9,12 +9,10 @@ export default class Board {
         this.numIterDOM = numIterDOM;
         this.msgDOM = msgDOM;
         this.interval = parseInt(intervalDOM.value);
-        // debugger
-        // this.interval = 80;
         this.width = canvas.width;
         this.height = canvas.height;
-        this.boardRows = 8;
-        this.boardCols = 8;
+        this.boardRows = 5;
+        this.boardCols = 5;
         this.squareHeight = this.height/this.boardRows;
         this.squareWidth = this.width/this.boardCols;
         this.boardArray = [...Array(this.boardRows)].map(e => new Array(this.boardCols).fill('X'));
@@ -263,11 +261,6 @@ export default class Board {
     warnsdorffNextMove(pos, alreadyVisited) {
         let moves = this.possibleKnightMoves(pos, alreadyVisited);
         let movesDegrees = {};
-        // moves.forEach(move => {
-        //     let nextMoves = this.possibleKnightMoves(move);
-        //     nextMoves = nextMoves.filter(nextMove => !(this.includesArr(alreadyVisited, nextMove)));
-        //     movesDegrees[move] = nextMoves.length;
-        // })
 
         const iterMove = (i) => {
             if (i < moves.length) {
@@ -275,15 +268,12 @@ export default class Board {
                 let nextMoves = this.possibleKnightMoves(move);
                 nextMoves = nextMoves.filter(nextMove => !(this.includesArr(alreadyVisited, nextMove)));
                 movesDegrees[move] = nextMoves.length;
+
                 this.clearSquare(move);
                 this.renderSquareDarkened(move);
-                // this.renderKnight(move, true);
                 this.renderNum(move, movesDegrees[move]);
                 this.renderPathWithoutClearing(alreadyVisited);
-                // this.renderLine(pos, move, "#2cf1d7");
-                // alreadyVisited.push(move);
-                // this.renderPath(alreadyVisited);
-                // alreadyVisited.pop();
+                
                 setTimeout(iterMove(i+1), this.interval);
             } else {
                 return;
@@ -315,9 +305,11 @@ export default class Board {
 
     backtrackingWrapper() {
         this.msgDOM.innerText = "";
+        this.ctx.clearRect(0, 0, this.width, this.height);
         this.numIterDOM.innerText = 0;
         let tours = [];
-        this.backtracking([2,5], [], tours);
+        stop = false;
+        this.backtracking([0,2], [], tours);
         if (tours.length > 0) {
             this.renderPath(tours[0]);
         }
@@ -342,8 +334,10 @@ export default class Board {
             let copy = [...alreadyVisited];
             tours.push(copy);
             this.msgDOM.innerText = "Success";
-            stop = true;
-            debugger
+            if (tours.length === 1) {
+                stop = true;
+                debugger
+            }
             return;
         }
 

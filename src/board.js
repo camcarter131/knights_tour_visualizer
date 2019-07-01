@@ -334,10 +334,10 @@ export default class Board {
             let copy = [...alreadyVisited];
             tours.push(copy);
             this.msgDOM.innerText = "Success";
-            if (tours.length === 1) {
-                stop = true;
-                debugger
-            }
+            // if (tours.length === 2) {
+            //     stop = true;
+            //     debugger
+            // }
             return;
         }
 

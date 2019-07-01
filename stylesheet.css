@@ -69,6 +69,23 @@
 }
 
 #algo-div {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 1px;
+    border-color: black;
+    border-style: double;
+    border-bottom: none;
+    padding: 30px;
+    background-color: #f0ead6;
+    /* background-color: #2cf1d7; */
+    /* background-color: rgba(8, 88, 216, 0.733) */
+}
+
+#blurb-div {
+    width: 15%;
     display: flex;
     flex-direction: column;
     align-items: center;

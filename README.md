@@ -6,4 +6,4 @@ A knight's tour is a series of moves wherein a knight lands on each square of a 
 
 VIEW LIVE: https://camcarter131.github.io/knights_tour_visualizer/
 
-![](tour3.gif)
+![](tour.gif)

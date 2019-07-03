@@ -11,8 +11,8 @@ export default class Board {
         this.interval = parseInt(intervalDOM.value);
         this.width = canvas.width;
         this.height = canvas.height;
-        this.boardRows = 5;
-        this.boardCols = 5;
+        this.boardRows = 8;
+        this.boardCols = 8;
         this.squareHeight = this.height/this.boardRows;
         this.squareWidth = this.width/this.boardCols;
         this.boardArray = [...Array(this.boardRows)].map(e => new Array(this.boardCols).fill('X'));

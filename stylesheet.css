@@ -68,6 +68,10 @@
   outline: none;
 }
 
+#info-header {
+    font-weight: bold;
+}
+
 #algo-div {
     width: 15%;
     display: flex;

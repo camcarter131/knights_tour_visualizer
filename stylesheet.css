@@ -68,9 +68,11 @@
   outline: none;
 }
 
-#info-header {
+.info-header {
     font-weight: bold;
 }
+
+
 
 #algo-div {
     width: 15%;
@@ -109,7 +111,9 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     font-size: 14px;
+    align-items: center;
 }
 
 #bar-div {
